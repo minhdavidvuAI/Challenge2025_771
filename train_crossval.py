@@ -149,24 +149,23 @@ def preprocess_folds(data_root, augment_root, output_root, test_folds, global_st
     for fold in test_folds:
         for root, tag in [(data_root, "raw"), (augment_root, "aug")]:
             #for subset in ("train", "val"):
-            for subset in "train":
-                out_dir = os.path.join(output_root, tag, f"fold_{fold}_{subset}")
-                os.makedirs(out_dir, exist_ok=True)
+            out_dir = os.path.join(output_root, tag, f"fold_{fold}_{subset}")
+            os.makedirs(out_dir, exist_ok=True)
 
-                ds = ESC50(
-                    root=root,
-                    test_folds={fold},
-                    subset=subset,
-                    global_mean_std=global_stats[fold-1],
-                    download=False,
-                    augmentedFlag=(tag=="aug"),
-                )
-                print(f"→ Preprocessing {tag} fold {fold} {subset}: {len(ds)} samples")
-                for i in tqdm(range(len(ds))):
-                    fname, feat, label = ds[i]
-                    pt_name = fname.replace('.wav', '.pt')
-                    torch.save({'features': feat, 'label': label},
-                               os.path.join(out_dir, pt_name))
+            ds = ESC50(
+                root=root,
+                test_folds={fold},
+                subset='train',
+                global_mean_std=global_stats[fold-1],
+                download=False,
+                augmentedFlag=(tag=="aug"),
+            )
+            print(f"→ Preprocessing {tag} fold {fold} train {len(ds)} samples")
+            for i in tqdm(range(len(ds))):
+                fname, feat, label = ds[i]
+                pt_name = fname.replace('.wav', '.pt')
+                torch.save({'features': feat, 'label': label},
+                           os.path.join(out_dir, pt_name))
 
 from torch.utils import data
 # a tiny loader that just pulls presaved .pt’s into memory
