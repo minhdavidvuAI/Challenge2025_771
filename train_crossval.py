@@ -149,7 +149,7 @@ def preprocess_folds(data_root, augment_root, output_root, test_folds, global_st
     for fold in test_folds:
         for root, tag in [(data_root, "raw"), (augment_root, "aug")]:
             #for subset in ("train", "val"):
-            out_dir = os.path.join(output_root, tag, f"fold_{fold}_{subset}")
+            out_dir = os.path.join(output_root, tag, f"fold_{fold}_train")
             os.makedirs(out_dir, exist_ok=True)
 
             ds = ESC50(
