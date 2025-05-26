@@ -47,7 +47,8 @@ class ResNet18(nn.Module):
 
         # Adapt input conv for input_channels (e.g., 1 for spectrogram)
         self.conv1 = nn.Conv2d(input_channels, self.in_channels,
-                               kernel_size=7, stride=2, padding=3, bias=False)
+                               kernel_size=3, stride=1, padding=1, bias=False)
+        #                       kernel_size=7, stride=2, padding=3, bias=False)
         self.bn1 = nn.BatchNorm2d(self.in_channels)
         self.relu = nn.ReLU(inplace=True)
 

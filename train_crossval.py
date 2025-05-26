@@ -134,10 +134,53 @@ def make_model():
     model = eval(model_constructor)
     return model
 
+#new shit might delete
+
+def preprocess_folds(data_root, augment_root, output_root, test_folds, global_stats):
+    """
+    Runs through each fold & subset and writes out .pt files.
+    - data_root: path to ESC-50-master
+    - augment_root: path to your augmented audio folder
+    - output_root: e.g. "preprocessed"
+    - test_folds: iterable of ints, e.g. [1,2,3,4,5]
+    - global_stats: list/array of (mean, std) per fold
+    """
+
+    for fold in test_folds:
+        for root, tag in [(data_root, "raw"), (augment_root, "aug")]:
+            for subset in ("train", "val"):
+                out_dir = os.path.join(output_root, tag, f"fold_{fold}_{subset}")
+                os.makedirs(out_dir, exist_ok=True)
+
+                ds = ESC50(
+                    root=root,
+                    test_folds={fold},
+                    subset=subset,
+                    global_mean_std=global_stats[fold-1],
+                    download=False,
+                    augmentedFlag=(tag=="aug"),
+                )
+                print(f"→ Preprocessing {tag} fold {fold} {subset}: {len(ds)} samples")
+                for i in tqdm(range(len(ds))):
+                    fname, feat, label = ds[i]
+                    pt_name = fname.replace('.wav', '.pt')
+                    torch.save({'features': feat, 'label': label},
+                               os.path.join(out_dir, pt_name))
+# a tiny loader that just pulls presaved .pt’s into memory
+class PreprocessedESC50(data.Dataset):
+    def __init__(self, folder):
+        files = sorted(os.listdir(folder))
+        self.data = [torch.load(os.path.join(folder, f)) for f in files]
+    def __len__(self):
+        return len(self.data)
+    def __getitem__(self, i):
+        # each torch.save was {'features': feat, 'label': label}
+        rec = self.data[i]
+        return files[i].replace('.pt','.wav'), rec['features'], rec['label']
 
 if __name__ == "__main__":
     import time
-    start_time = time.time()
+    start = time.time()
     
     data_path = config.esc50_path
     use_cuda = torch.cuda.is_available()
@@ -165,6 +208,8 @@ if __name__ == "__main__":
     print(global_stats)
     # for spectrograms
     
+    preprocess_folds('data/esc50/ESC-50-master/audio', config.augment_path, 'data/preprocessed', [1,2,3,4,5], global_stats)
+    
     print(f"LR: {config.lr}; WEIGHT: {config.weight_decay}")
     print("WARNING: Using hardcoded global mean and std. Depends on feature settings!")
     for test_fold in config.test_folds:
@@ -175,6 +220,7 @@ if __name__ == "__main__":
         # clone stdout to file (does not include stderr). If used may confuse linux 'tee' command.
         with Tee(os.path.join(experiment, 'train.log'), 'w', 1, encoding='utf-8',
                  newline='\n', proc_cr=True):
+            """ felt cute might delete later
             # this function assures consistent 'test_folds' setting for train, val, test splits
             get_fold_dataset = partial(ESC50, root=data_path, download=False,
                                        test_folds={test_fold}, global_mean_std=global_stats[test_fold - 1])
@@ -192,7 +238,10 @@ if __name__ == "__main__":
             train_set = get_fold_dataset(subset="train")
             augmented_set = get_fold_augmented(subset="train")
             combined_dataset = ConcatDataset([train_set, augmented_set])
-            
+            """
+            raw_train = PreprocessedESC50(f"preprocessed/raw/fold_{test_fold}_train")
+            aug_train = PreprocessedESC50(f"preprocessed/aug/fold_{test_fold}_train")
+            train_set = ConcatDataset([raw_train, aug_train])
             # sanity check
             # train set should be the same length as augmented
             if len(train_set) != len(augmented_set):
