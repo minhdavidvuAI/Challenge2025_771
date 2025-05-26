@@ -206,7 +206,7 @@ if __name__ == "__main__":
     # for all folds
     scores = {}
     # expensive!
-    global_stats = get_global_stats(data_path, augment_path)
+    #global_stats = get_global_stats(data_path, augment_path)
     print(global_stats)
     # for spectrograms
     
@@ -246,10 +246,10 @@ if __name__ == "__main__":
             train_set = ConcatDataset([raw_train, aug_train])
             # sanity check
             # train set should be the same length as augmented
-            if len(train_set) != len(augmented_set):
-                print(f"lenght org: {len(train_set)}")
-                print(f"lenght aug: {len(augmented_set)}")
-                print(f"lenght both: {len(combined_dataset)}")
+            if len(raw_train) != len(aug_train):
+                print(f"lenght org: {len(raw_train)}")
+                print(f"lenght aug: {len(aug_train)}")
+                print(f"lenght both: {len(train_set)}")
                 raise ValueError
             
             #global_stats = get_global_stats(data_path, augment_path)
@@ -257,10 +257,10 @@ if __name__ == "__main__":
             
             
             print('*****')
-            print(f'train folds are {train_set.train_folds} and test fold is {train_set.test_folds}')
+            print(f'train folds are {config.test_folds} and test fold is {test_fold}')
             print('random wave cropping')
 
-            train_loader = torch.utils.data.DataLoader(combined_dataset,
+            train_loader = torch.utils.data.DataLoader(train_set,
                                                        batch_size=config.batch_size,
                                                        shuffle=True,
                                                        num_workers=config.num_workers,
