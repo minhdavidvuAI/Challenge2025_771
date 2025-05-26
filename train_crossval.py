@@ -148,7 +148,8 @@ def preprocess_folds(data_root, augment_root, output_root, test_folds, global_st
 
     for fold in test_folds:
         for root, tag in [(data_root, "raw"), (augment_root, "aug")]:
-            for subset in ("train", "val"):
+            #for subset in ("train", "val"):
+            for subset in "train":
                 out_dir = os.path.join(output_root, tag, f"fold_{fold}_{subset}")
                 os.makedirs(out_dir, exist_ok=True)
 
@@ -171,15 +172,19 @@ from torch.utils import data
 # a tiny loader that just pulls presaved .pt’s into memory
 class PreprocessedESC50(data.Dataset):
     def __init__(self, folder):
-        files = sorted(os.listdir(folder))
-        self.data = [torch.load(os.path.join(folder, f)) for f in files]
-    def __len__(self):
-        return len(self.data)
-    def __getitem__(self, i):
-        # each torch.save was {'features': feat, 'label': label}
-        rec = self.data[i]
-        return files[i].replace('.pt','.wav'), rec['features'], rec['label']
+        self.files = sorted(f for f in os.listdir(folder) if f.endswith('.pt'))
+        self.folder = folder
 
+    def __len__(self):
+        return len(self.files)
+
+    def __getitem__(self, idx):
+        fname = self.files[idx]
+        rec = torch.load(os.path.join(self.folder, fname))
+        # restore the original .wav name if you need it
+        wav_name = fname.replace('.pt', '.wav')
+        return wav_name, rec['features'], rec['label']
+        
 if __name__ == "__main__":
     import time
     start = time.time()
@@ -252,9 +257,8 @@ if __name__ == "__main__":
                 print(f"lenght both: {len(train_set)}")
                 raise ValueError
             
-            #global_stats = get_global_stats(data_path, augment_path)
-            #print(global_stats)
-            
+            get_fold_dataset = partial(ESC50, root=data_path, download=False,
+                                       test_folds={test_fold}, global_mean_std=global_stats[test_fold - 1])
             
             print('*****')
             print(f'train folds are {config.test_folds} and test fold is {test_fold}')
