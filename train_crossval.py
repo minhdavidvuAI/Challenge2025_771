@@ -210,7 +210,7 @@ if __name__ == "__main__":
     print(global_stats)
     # for spectrograms
     
-    preprocess_folds('data/esc50/ESC-50-master/audio', config.augment_path, 'data/preprocessed', [1,2,3,4,5], global_stats)
+    preprocess_folds('data/esc50', config.augment_path, 'data/preprocessed', [1,2,3,4,5], global_stats)
     
     print(f"LR: {config.lr}; WEIGHT: {config.weight_decay}")
     print("WARNING: Using hardcoded global mean and std. Depends on feature settings!")
