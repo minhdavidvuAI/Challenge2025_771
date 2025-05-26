@@ -241,8 +241,8 @@ if __name__ == "__main__":
             augmented_set = get_fold_augmented(subset="train")
             combined_dataset = ConcatDataset([train_set, augmented_set])
             """
-            raw_train = PreprocessedESC50(f"preprocessed/raw/fold_{test_fold}_train")
-            aug_train = PreprocessedESC50(f"preprocessed/aug/fold_{test_fold}_train")
+            raw_train = PreprocessedESC50(f"data/preprocessed/raw/fold_{test_fold}_train")
+            aug_train = PreprocessedESC50(f"data/preprocessed/aug/fold_{test_fold}_train")
             train_set = ConcatDataset([raw_train, aug_train])
             # sanity check
             # train set should be the same length as augmented
