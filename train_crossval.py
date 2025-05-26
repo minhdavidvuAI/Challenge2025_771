@@ -17,11 +17,11 @@ from augmentAudioClass import AudioAugmenter
 import config
 
 # mean and std of train data for every fold
-global_stats = np.array([[-54.342407,  21.136114],
-                         [-54.27736,   21.037266],
-                         [-54.197487,  21.005411],
-                         [-54.35301,   20.971909],
-                         [-54.166874,  21.144987]]) 
+global_stats = np.array([[-49.97833,   25.170425],
+                         [-49.81923,   25.137167],
+                         [-49.829582,  25.104254],
+                         [-49.73296,   25.101704],
+                         [-49.650196,  25.181137]])
  
 
 # evaluate model on different testing data 'dataloader'
