@@ -166,6 +166,8 @@ def preprocess_folds(data_root, augment_root, output_root, test_folds, global_st
                     pt_name = fname.replace('.wav', '.pt')
                     torch.save({'features': feat, 'label': label},
                                os.path.join(out_dir, pt_name))
+
+from torch.utils import data
 # a tiny loader that just pulls presaved .pt’s into memory
 class PreprocessedESC50(data.Dataset):
     def __init__(self, folder):
